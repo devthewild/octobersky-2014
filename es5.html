@@ -1,0 +1,489 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<title>ES5 on Node</title>
+
+	<link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+	<link rel="stylesheet" href="reveal.js/css/theme/solarized.css" id="theme">
+	<link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
+	<style type="text/css">
+		.bottom-line {
+			position: fixed;
+			bottom: 0px;
+			width: 100%;
+			text-align: right;
+			padding: 5px 15px 5px 0px !important;
+			background-color: white !important;
+			font-size: .8em !important;
+		}
+
+		.reveal pre code {
+			padding-left: 15px;
+			line-height: 1.5em;
+		}
+		.reveal table {
+			width: 100%;
+		}
+		th, td {
+			text-align:center !important;
+		}
+
+		.vertical {
+			width: 50%;
+			float: left;
+		}
+	</style>
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1>ES5 on Node</h1>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<h3>V8에서 구현된 ECMA5</h3>
+				<p>Seoh</p>
+			</section>
+
+			<section>
+				<h2>TOC</h2>
+				<hr />
+				<ul>
+					<li>History</li>
+					<li>Browser Support</li>
+					<li>And so on</li>
+				</ul>
+			</section>
+			<section>
+				<h2>History</h2>
+				<hr />
+
+				<ul>
+					<li>2011년 2월 3일<span class="fragment"> - <a href="http://chrome.blogspot.kr/2011/02/dash-of-speed-3d-and-apps.html">Chrome 9 Stable Release</a></span>
+						<ul class="fragment">
+							<li>Chrome Web Store</li>
+							<li>WebGL</li>
+							<li>Chrome Instant(순간검색)</li>
+						</ul>
+					</li>
+					<li class="fragment">2011년 2월 7일
+						<span class="fragment"> - <a href="https://code.google.com/p/v8/source/browse/trunk/ChangeLog#5000">V8 3.1.2 Release</a></span> 
+					</li>
+					<li class="fragment">2011년 2월 10일
+						<span class="fragment"> - <a href="http://nodejs.org/changelog.html">nodejs 0.4.0 Stable</a></span>
+						<ul class="fragment">
+							<li>Upgrade V8 to 3.1.2</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+			<section>
+				<h2>Getter/Setter</h2>
+				<hr />
+				<pre><code data-trim>
+var obj = {
+	value: [],
+	get a() { return this.value.join(', ') },
+	set a(value) { this.value.push(value); return this; } 
+}
+obj.a = 'a', obj.a = 'b';
+console.log(obj.a); // a, b
+			</code></pre>
+			<div>
+				<p>&nbsp;
+				</p>
+				<table>
+					<thead>
+						<tr>
+							<th>Chrome</th>
+							<th>IE</th>
+							<th>Firefox(Gecko)</th>
+							<th>Opera</th>
+							<th>Safari</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="fragment grow" data-fragment-index="1">1</td>
+							<td class="fragment grow" data-fragment-index="1">9</td>
+							<td>2.0 (1.8.1)</td>
+							<td>9.5</td>
+							<td>3</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<section>
+			<h2>Array *</h2>
+			<hr />
+			<section>
+				<ul>
+					<li>Array.isArray</li>
+					<li>indexOf(value)</li>
+					<li>lastIndexOf(value)</li>
+					<li>filter(callback)</li>
+					<li>forEach(callback)</li>
+					<li>every(callback)</li>
+					<li>map(callback)</li>
+					<li>some(callback)</li>
+					<li>reduce(callback[, initialValue])</li>
+					<li>reduceRight(callback[, initialValue])</li>
+				</ul>
+			</section>
+			<section>
+				<p>Lo-Dash (tested in)</p>
+
+				<table>
+					<thead>
+						<tr>
+							<th>Firefox</th>
+							<th>Chrome</th>
+							<th>IE</th>
+							<th>Opera</th>
+							<th>Safari</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>3</td>
+							<td>19</td>
+							<td>6</td>
+							<td>10</td>
+							<td>5</td>
+						</tr>
+					</tbody>
+				</table>
+				<p>&nbsp;</p>
+				<ul>
+					<li>_.filter, _.select</li>
+					<li>_.forEach, _.each</li>
+					<li>_.every, _.all</li>
+					<li>_.map, _.collect</li>
+					<li>_.some, _.any</li>
+					<li>_.reduce, _.foldl, _.inject</li>
+					<li>_.reduceRight, _foldr</li>
+				</ul>
+			</section>
+			<section>
+				<h4><a href="http://jsperf.com/lodash-underscore/18">Lo-Dash vs Underscore</a> in Chrome 35</h4>
+				<div><img style="width:486px;height:248px;" src="lodash.png" /></div>
+				<ul>
+					<li>odd: Underscore</li>
+					<li>even: Lo-Dash</li>
+				</ul>
+			</section>
+		</section>
+
+		<section>
+			<h2>Array</h2>
+			<hr />
+			<section>
+				<table>
+					<thead>
+						<tr>
+							<th>Function</th>
+							<th>Chrome</th>
+							<th>IE</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Array.isArray</td>
+							<td>5</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>indexOf</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>lastIndexOf</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>filter</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>forEach</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>every</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>map</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>some</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>reduce</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+						<tr>
+							<td>reduceRight</td>
+							<td>*</td>
+							<td>9</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+		</section>
+		<section>
+			<h2>Date</h2>
+			<hr />
+			<table>
+				<thead>
+					<tr>
+						<th>Function</th>
+						<th>Chrome</th>
+						<th>IE</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Date.now</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>toISOString</td>
+						<td>*</td>
+						<td>9</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+		<section>
+			<h2>Object</h2>
+			<hr />
+			<li>Object.create(proto, props) </li>
+			<li>Object.keys(obj) </li>
+			<li>Object.defineProperty(obj, prop, desc) </li>
+			<li>Object.defineProperties(obj, props) </li>
+			<li>Object.getOwnPropertyNames(obj) </li>
+			<li>Object.getPrototypeOf(obj) </li>
+			<li>Object.getOwnPropertyDescriptor(obj, property) </li>
+			<li>Object.preventExtensions(obj) </li>
+			<li>Object.isExtensible(obj) </li>
+			<li>Object.seal(obj) </li>
+			<li>Object.isSealed(obj) </li>
+			<li>Object.freeze(obj) </li>
+			<li>Object.isFrozen(obj) </li>
+			<aside class="notes">
+				property: value, writable, enumerable, configuarable
+				defineProperties = {name: prop, name: prop}
+				seal 추가/삭제 불가. writable이 된다면 가능. 일종의 메모리 unchanged
+				freeze는 다 안됨
+			</aside>
+		</section>
+		<section>
+			<h2>Object Property *</h2>
+			<hr />
+			<section>
+				<ul>
+					<li style="margin-bottom:20px;">이름: 설명(기본값)</li>
+					<li>value: 값(undefined)</li>
+					<li>get/set: getter/setter(undefined)</li>
+					<li>writable: 변경가능(false)</li>
+					<li>enumerable: for-in에서 제외, hasOwnProperty 가능(false)</li>
+					<li>configurable: delete 가능한지(false)</li>
+				</ul>
+			</section>
+			<section>
+				@see <a href="http://adriancooney.github.io/voyeur.js/">Voyeur</a> <br />
+				@see <a href="http://www.explainjs.com/explain?src=https%3A%2F%2Fraw.githubusercontent.com%2Fadriancooney%2Fvoyeur.js%2Fmaster%2FVoyeur.js">Voyeur:Explain</a>
+			</section>
+		</section>
+		<section>
+			<h2>Object</h2>
+			<hr />
+			<table>
+				<thead>
+					<tr>
+						<th>Function</th>
+						<th>Chrome</th>
+						<th>IE</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>create</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>keys</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>defineProperty *</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>defineProperties</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>getOwnPropertyNames</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>getPrototypeOf</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>getOwnPropertyDescriptor</td>
+						<td>5</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>preventExtensions</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>isExtensible</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>seal</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>isSealed</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>freeze</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>isFrozen</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+				</tbody>
+			</table>
+			<aside class="notes">
+				defineProperty IE8에서 작동하지만 비표준
+				Safari 5에서는 DOMElement 불가능, 5.1에서부터 가능 
+			</aside>
+		</section>
+		<section>
+			<h2>Object.prototype (not ES 5)</h2>
+			<hr />
+			<ul>
+				<li>__defineGetter__(name, callback)</li>
+				<li>__defineSetter__(name, callback)</li>
+				<li>__lookupGetter__(name)</li>
+				<li>__lookupSetter__(name)</li>
+				<li>모든 브라우져에서 잘 동작</li>
+				<li class="fragment">물론 IE는 11이상부터</li>
+				<li class="fragment">isPrototypeOf(obj) - ES3,5</li>
+			</ul>
+		</section>
+		<section>
+			<h2>ETC</h2>
+			<hr />
+			<table>
+				<thead>
+					<tr>
+						<th>Function</th>
+						<th>Chrome</th>
+						<th>IE</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>JSON.stringify</td>
+						<td>*</td>
+						<td>8</td>
+					</tr>
+					<tr>
+						<td>JSON.parse</td>
+						<td>*</td>
+						<td>8</td>
+					</tr>
+					<tr>
+						<td>Function.prototype.bind</td>
+						<td>6</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>String.prototype.trim</td>
+						<td>*</td>
+						<td>9</td>
+					</tr>
+					<tr>
+						<td>String.prototype.trimLeft*</td>
+						<td>*</td>
+						<td>x</td>
+					</tr>
+					<tr>
+						<td>String.prototype.trimRight*</td>
+						<td>*</td>
+						<td>x</td>
+					</tr>
+				</tbody>
+			</table>
+		</section>
+		<section>
+			<h2>END</h2>
+			<hr />
+			<a href="reveal.js/#/4"><img src="end.jpg" /></a>
+		</section>
+	</div>
+	<div class="bottom-line">
+		octobersky seoh <span style="color:#cccccc;">$</span> node es5&nbsp;
+	</div>
+
+</div>
+
+<script src="reveal.js/lib/js/head.min.js"></script>
+<script src="reveal.js/js/reveal.min.js"></script>
+
+<script>
+
+	Reveal.initialize({
+		controls: false,
+		progress: true,
+		history: true,
+		center: false,
+		transition: 'linear',
+
+		dependencies: [
+			{ src: 'plugin/highlight/highlight.js'
+			,	async: true
+			,	callback: function() { 
+				hljs.initHighlightingOnLoad(); }
+			}]
+		});
+</script>
+</body>
+</html>

@@ -1,0 +1,790 @@
+<!doctype html>
+<html lang="ko">
+<head>
+	<meta charset="utf-8">
+	<title>ES6 on Node</title>
+
+	<meta name="apple-mobile-web-app-capable" content="yes" />
+	<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+	<link rel="stylesheet" href="reveal.js/css/reveal.min.css">
+	<link rel="stylesheet" href="reveal.js/css/theme/solarized.css" id="theme">
+	<link rel="stylesheet" href="reveal.js/lib/css/zenburn.css">
+	<style type="text/css">
+		.bottom-line {
+			position: fixed;
+			bottom: 0px;
+			width: 100%;
+			text-align: right;
+			padding: 5px 15px 5px 0px !important;
+			background-color: white !important;
+			font-size: .8em !important;
+		}
+
+		.reveal pre code {
+			padding-left: 15px;
+			line-height: 1.5em;
+		}
+		.reveal table {
+			width: 100%;
+		}
+		th, td {
+			text-align:center !important;
+		}
+
+		.vertical {
+			width: 50%;
+			float: left;
+		}
+	</style>
+</head>
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h1>ES6 on Node</h1>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<p>&nbsp;</p>
+				<p>Seoh</p>
+			</section>
+
+
+			<section>
+				<h2>Stable</h2>
+				<hr />
+				<section>
+				<pre><code data-trim>
+$ node -v
+v0.10.28
+$ node --v8-options | grep harm
+--harmony_typeof (enable harmony semantics for typeof)
+--harmony_scoping (enable harmony block scoping)
+--harmony_modules (enable harmony modules (implies block scoping))
+--harmony_proxies (enable harmony proxies)
+--harmony_collections (enable harmony collections (sets, maps, and weak maps))
+--harmony (enable all harmony features (except typeof))
+			</code></pre>
+			</section>
+			<section>
+				<ul>
+					<li>TypeOf</li>
+					<li>Scoping</li>
+					<li>Modules</li>
+					<li>Proxy</li>
+					<li>Collection</li>
+				</ul>
+			</section>
+		</section>
+
+		<section>
+			<h2>Unstable</h2>
+			<hr />
+			<section>
+			<pre><code data-trim style="max-height:none !important;">
+$ node -v
+v0.11.13
+$ node --v8-options | grep harm
+--harmony_typeof (enable harmony semantics for typeof)
+--harmony_scoping (enable harmony block scoping)
+--harmony_modules (enable harmony modules (implies block scoping))
+--harmony_symbols (enable harmony symbols (a.k.a. private names))
+--harmony_proxies (enable harmony proxies)
+--harmony_collections (enable harmony collections (sets, maps))
+--harmony_generators (enable harmony generators)
+--harmony_iteration (enable harmony iteration (for-of))
+--harmony_numeric_literals (enable harmony numeric literals (0o77, 0b11))
+--harmony_strings (enable harmony string)
+--harmony_arrays (enable harmony arrays)
+--harmony_maths (enable harmony math functions)
+--harmony (enable all harmony features (except typeof))
+			</code></pre>
+			</section>
+			<section>
+				<ul>
+					<li>Symbol</li>
+					<li>Generator</li>
+					<li>Iteration</li>
+					<li>Numeric Literal</li>
+					<li>String</li>
+					<li>Arrray</li>
+					<li>Math</li>
+				</ul>
+			</section>
+		</section>
+
+		<section>
+			<h2>TypeOf (--harmony_typeof)</h2>
+			<hr />
+			<section>
+						<div>
+			<h5>State: Rejected</h5>
+			<blockquote style="width:100%;">
+				<p>이 제안은 현재 거절되었다. V8에 구현은 되어있지만 현재 운영중인 많은 사이트들이 깨질 수 있다. 이것은 자바스크립트의 정신에 어긋난다. - <a href="http://wiki.ecmascript.org/doku.php?id=harmony:typeof_null">ECMAScript Wiki</a></p>
+			</blockquote>
+			</div>
+
+			</section>
+			<section>
+				<pre><code>
+// ES5
+var ret = getObject();
+var success = ret &amp;&amp; typeof ret === "object";
+				</code></pre>
+				<pre><code>
+// ES6
+var ret = getObject();
+var success = typeof ret === "object";
+				</code></pre>
+			</section>
+		<section>
+			<h5>try</h5>
+			<pre><code>
+$ node -e "console.log(typeof null)"
+object
+$ node --harmony_typeof -e "console.log(typeof null)"
+null
+			</code></pre>
+		</section>
+		</section>
+
+		<section>
+			<h2>Scoping (--harmony_scoping)</h2>
+			<hr />
+			<section>
+				<ul><li>현재까지 block scope라는 개념이 없었다</li></ul>
+				<pre><code>
+// ES5
+'use strcit';
+for (var i = 0; i &lt; 3; i++) {
+  console.log('i:', i);
+}
+console.log(i);
+				</code></pre>
+			</section>
+			<section>
+<pre><code>
+// ES6
+'use strict;'
+for (let i = 0; i &lt; 3; i++) {
+  console.log('i:', i);
+}
+console.log(i); // ReferenceError: a is not defined
+</code></pre>
+<pre class="fragment"><code>
+// ES6
+const a = 1; a = 2;
+console.log(a); // 1
+</code></pre>
+			</section>
+		</section>
+		<section>
+			<h2>Module (--harmony_modules)</h2>
+			<hr />
+			<section>
+				<p> Goal </p>
+				<ul>
+					<li>코드별로 독립적인 실행 가능(like namespace)</li>
+					<li>모듈화로 리팩토링하기 좋게</li>
+					<li>AMD, CommonJS, RequireJS에서 전환하기 좋게</li>
+					<li>빠른 해석(compilation)</li>
+					<li>브라우져/비(non)브라우져간의 호환</li>
+					<li class="fragment">라이브러리 공유에 대한 표준 프로토콜</li>
+				</ul>
+			</section>
+			<section>
+				<pre><code>
+// math.js
+module 'math' {
+    export function sum(x, y) {
+        return x + y;
+    }
+    export var pi = 3.141593;
+}
+				</code></pre>
+			</section>
+			<section>
+				<pre><code>
+// client.js // import Module
+module Math from 'math'
+
+console.log(Math.sum(Math.pi, Math.pi));
+				</code></pre>
+			</section>
+			<section><pre><code>
+// client2.js // import certain properties
+import {sum, pi} from 'math';
+
+console.log("2π = " + sum(pi, pi));
+			</code></pre></section>
+			<section>
+				<pre><code>
+// client3.js // import certain properties with renaming
+import { sum, pi as PI } from 'math'
+
+console.log(sum(PI, PI));
+				</code></pre>
+			</section>
+			<section>
+				<pre><code>
+// counter.js // private member
+module Counter{
+    var n = 0;
+    export function inc() { return ++n; }
+    export function dec() { return --n;}
+    export function cur() { return n;}
+}
+
+Counter.n // undefined.
+Counter.inc() // 1
+Counter.dec() // 0
+Counter.cur() // 0
+				</code></pre>
+				<ul>
+					<li class="fragment">REPL에서는 작동</li>
+					<li class="fragment">file 단위로는 작동 안함</li>
+				</ul>
+			</section>
+			<section>
+				<h4>Current</h4>
+				<ul>
+					<li>어떤 브라우져에서도 지원되지 않음 <a href="http://kangax.github.io/compat-table/es6/"> - 호환 테이블</a></li>
+					<li>부분적으로 구현되었으나 사용할 정도가 아니다 - <a href="https://code.google.com/p/traceur-compiler/wiki/LanguageFeatures#Modules">Traceur</a></li>
+				</ul>
+				<div class="fragment fade-in">
+				<pre><code>
+// module 'math' {
+    export function sum(x, y) {
+        return x + y;
+    }
+    export var pi = 3.141593;
+// }					
+				</code></pre>
+				<p>Traceur에서 module 키워드가 제대로 작동하지 않는다.</p>
+				</div>
+			</section>
+		</section>
+<section>
+<h2>Symbols (--harmony_symbols)</h2>
+<hr />
+<section>
+<pre><code>
+function Clazz() {
+	var a = { value: 1 };
+	var b = { value: 2 };
+
+	this[a] = 'this is a';
+	this[b] = 'this is b';
+}
+console.log(Object.keys(new Clazz));
+</code></pre>
+<p class="fragment">[ '[object Object]' ]</p>
+</section>
+<section>
+<ul>
+	<li>새로운 Primitive Type</li>
+	<li>key값으로 사용할 수 있다</li>
+</ul>
+<pre><code>
+function Clazz(data) {
+    var key = Symbol('private');
+    this[key] = data;
+}
+
+var clazz = new Clazz('private date is unprotected');
+Object.getOwnPropertySymbols(clazz).forEach(function(sym){
+    console.log(clazz[sym]); // 'private date is unprotected'
+});
+
+console.log('Unique', Symbol('key') !== Symbol('key')); // true
+</code></pre>
+</section>
+<section>
+	<ul>
+		<li>V8에 구현되었지만 ES6는 아님</li>
+		<li>ES6에서는 <a href="http://wiki.ecmascript.org/doku.php?id=harmony:private_name_objects">Private Name Object</a></li>
+		<li><code>Object.getOwnPropertySymbols</code>를 통해 가져올 수 있어서 private으로는 부적절</li>
+	</ul>
+</section>
+</section>
+<section>
+<h2>Proxy (--harmony_proxies)</h2>
+<hr />
+<section>
+<ul><li>실행 시 가로채기</li>
+<li>객체의 가상화</li>
+<li>Logging/Profiling</li></ul>
+</section>
+<section>
+	<pre><code>
+// 보통 객체에 대한 프록시
+var target = {};
+var handler = {
+  get: function (receiver, name) {
+    return 'Hello, ' + name + '!';
+  }
+};
+
+var p = new Proxy(target, handler);
+console.log(p.world); // 'Hello, world!'
+	</code></pre>
+</section>
+<section>
+	<pre><code>
+// 함수 객체에 대한 프록시
+var target = function () { return 'I am the target'; };
+var handler = {
+  apply: function (receiver) {
+    return 'I am the proxy';
+  }
+};
+
+var p = new Proxy(target, handler);
+p() === 'I am the proxy';
+	</code></pre>
+</section>
+<section>
+	<pre><code>
+// --harmony_proxies
+typeof Proxy.prototype // 'undefined'
+Proxy.constructor.toString() // 'function Object() { [native code] }'
+Object.prototype.toString.call(Proxy) // '[object Object]'
+</code></pre>
+<pre><code>
+// 객체에 대한 프록시
+var target = { a:1, b:2 };
+var handler = {
+  get: function (receiver, name) {
+    return target[name] || 
+        name + ' is not defined.';
+  }
+};
+
+var p = Proxy.create(handler, target);
+console.log(p.a); // 1 
+console.log(p.world); // console.log(p.world);
+	</code></pre>
+</section>
+<section>
+	<pre><code>
+// 함수에 대한 프록시
+var handler = {
+  get: function(proxy, name) {
+    if (name === 'prototype') return Object.prototype;
+    return 'Hello, '+ name;
+  }
+};
+var fproxy = Proxy.createFunction(
+  handler,
+  function() { return arguments[0]; }, // call trap
+  function() { return arguments[1]; }  // construct trap
+ );
+
+console.log(fproxy(1,2)); // 1
+console.log(new fproxy(1,2)); // 2
+console.log(fproxy.prototype === Object.prototype); // Object.prototype
+console.log(fproxy.foo); // 'Hello, foo'
+	</code></pre>
+</section>
+<section>
+	<h4>State</h4>
+	<ul>
+		<li>ES6는 현재 <a href="http://wiki.ecmascript.org/doku.php?id=harmony:direct_proxies">Direct Proxy</a>로 변경</li>
+		<li>언제 바뀔지 모름...</li>
+	</ul>
+</section>
+</section>
+<section>
+	<h2> Collection (--harmony_collections)</h2>
+	<hr />
+	<section>
+- <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap#Why_WeakMap.3F">왜 WeakMap인가?</a>
+<ul>
+<li>key/value 배열2개로 Map 구현 가능하지만</li>
+<ol>
+	<li>key를 찾는데 O(n)탐색</li>
+	<li>메모리 누수</li>
+</ol>
+<li>약한 참조라 key값의 리스트를 관리하지 않는다 - enumarable 불가능</li>
+</ul>
+	</section>
+	<section>
+<pre><code>
+// Sets
+var s = new Set();
+s.add("hello").add("goodbye").add("hello");
+s.size === 2;
+s.has("hello") === true;
+
+// Maps
+var m = new Map();
+m.set("hello", 42);
+m.set(s, 34);
+m.get(s) == 34;
+</code></pre></section>
+<section><pre><code>
+// Weak Maps
+var wm = new WeakMap();
+wm.set(s, { extra: 42 });
+wm.size === undefined
+
+// Weak Sets
+var ws = new WeakSet();
+ws.add({ data: 42 });
+</code></pre>
+	</section>
+</section>
+
+<section>
+	<h2>Generator (--harmony_generators)</h2>
+	<hr />
+	<section>
+		<ol>
+			<li><code>function *</code>으로 선언</li>
+			<li><code>yield</code>로 리턴</li>
+		</ol>
+		<pre><code data-trim>
+function* fib(){
+	var pre = 0, cur = 1;
+
+	while( cur &lt; 100 ) {
+		var temp = pre;
+		pre = cur;
+		cur += temp;
+		yield cur;
+	}
+	return cur;
+}
+		</code></pre>
+	</section>
+	<section>
+		<pre><code>
+var gen = fib(), result = null;
+
+while( !(result = gen.next()).done ){
+	console.log(result);
+	// { value: 1, done: false }
+	// { value: 2, done: false }
+	// ...
+	// { value: 144, done: false }
+}
+
+console.log(result); // { value: 144, done: true }
+console.log(gen.next()); // { value: undefined, done: true }
+		</code></pre>
+	</section>
+	<section>
+		<h4>Psuedo Class(like Java)</h4>
+		<pre><code>interface Iterator {
+	IteratorResult next(Object value) throw StopIteration;
+}</code></pre>
+	</section>
+	<section>
+		<p>IteratorResult next(Object <i>value</i>)</p>
+		<pre><code>function *inc(){
+	var a = 0;
+	while(true)	console.log(yield ++a);
+}
+
+var gen = inc();
+var result = {value : 0};
+for( var i=0 ; i<10 ; i++ ) {
+	result = gen.next('return ' + result.value);
+}</code></pre>
+<pre class="fragment"><code data-trim>
+return 1
+return 2
+...
+</code></pre>
+	</section>
+</section>
+<section>
+	<h2> Iteration (--harmony_iteration)</h2>
+	<hr />
+	<section>
+
+		<ul>
+			<li>for-in loop와는 다르게 확장 가능을 목적으로</li>
+			<li>node에서 for-of는 현재 Generator만 지원</li>
+			<li>for-of로 객체를 순환하면 묵시적으로 <code>iterator</code> method를 호출</li>
+			<li>Firefox는 iterator 대신 '@@iterator' 함수로 지원</li>
+			<li>Firefox에서는 StopIteration 지원</li>
+		</ul>
+		<div class="fragment">
+		<pre><code data-trim>
+while( !(result = gen.next()).done ){
+	console.log(result.value);
+}</code></pre>
+<pre><code data-trim>for( var value of fib() )
+	console.log(value);</code></pre></div>
+	</section>
+	<section>
+		<pre><code data-trim>
+		// in Spec
+for (word of ["one", "two", "three"]) {
+    alert(word);
+}
+
+var s = Set([1, 3, 4, 2, 3, 2, 17, 17, 1, 17]);
+for (var v of s) {
+    alert(v);
+}
+		</code></pre>
+
+		<p>현재 진행중 <a href="http://wiki.ecmascript.org/doku.php?id=harmony:iterators">harmony:iterators</a></p>
+	</section>
+</section>
+<section>
+	<h2>Numeric Literal (--harmony_numeric_literals)</h2>
+	<hr />
+	<p>2진수, 8진수 추가</p>
+	<pre><code data-trim>
+0b111110111 === 503 // true
+0o767 === 503 // true
+	</code></pre>
+</section>
+<section>
+<h2>String (--harmony_strings)</h2>
+<hr />
+	<pre><code data-trim>
+"abcde".contains("cd") // true
+"abc".repeat(3) // "abcabcabc"
+"abc".startsWith('a') &&  "abc".endsWith('c') // true
+"( ͡° ͜ʖ ͡°) 애긔야".normalize(/** "NFC" | "NFD" | "NFKD" | "NFKC" */);
+	</code></pre>
+	<p><a href="http://ko.wikipedia.org/wiki/%EC%9C%A0%EB%8B%88%EC%BD%94%EB%93%9C_%EC%A0%95%EA%B7%9C%ED%99%94">유니코드 정규화</a>의 기본 지원</p>
+</section>
+<section>
+	<h2>Array (--harmony_arrays)</h2>
+	<hr />
+
+	<pre><code data-trim>
+Array.from(document.querySelectorAll('*')) // 진짜 Array로 리턴
+Array.of(1, 2, 3) // [1, 2, 3]
+[1,2,3].findIndex(function(i){ return i === 2; }); // 1
+	</code></pre>
+
+	<pre><code data-trim>
+// NOT WORK
+[0, 0, 0].fill(7, 1) // [0,7,7]
+["a", "b", "c"].entries() // iterator [0, "a"], [1,"b"], [2,"c"]
+["a", "b", "c"].keys() // iterator 0, 1, 2
+["a", "b", "c"].values() // iterator "a", "b", "c"
+	</code></pre>
+</section>
+<section>
+	<h2> Math (--harmony_maths)</h2>
+	<hr />
+	<pre><code data-trim>
+Number.isInteger(Number.EPSILON) // false
+Number.isSafeInteger(Number.MAX_SAFE_INTEGER+1) // false // value < 2^53
+	</code></pre>
+	<div class="fragment">그 외 Math.clz32 Math.imul Math.sign Math.log10 Math.log2 Math.log1p Math.expm1 Math.cosh Math.sinh Math.tanh Math.acosh Math.asinh Math.atanh Math.hypot Math.trunc Math.fround Math.cbrt 지원
+	</div>
+</section>
+
+<section>
+	<h2>Promise</h2>
+	<hr />
+	<section>
+		<pre><code data-trim style="max-height:none !important;">
+// callback hell
+exports.processJob = function(options, next) {
+ db.getUser(options.userId, function(err, user) {
+  if (error) return next(err);    
+  db.updateAccount(user.accountId, options.total, function(err) {
+   if (err) return next(err);
+    http.post(options.url, function(err) {
+     if (err) return next(err);
+      next();
+    });
+  }); 
+ });
+};
+		</code></pre>
+	</section>
+	<section>
+		<ul>
+			<li>node는 0.11부터 지원</li>
+			<li><a href="http://andrwj.com/blog/?p=778">Promise/A+ Spec</a></li>
+			<li>jQuery에서는 1.12/2.2에서 동일 인터페이스</li>
+			<li><a href="http://nodeschool.io/#promiseitwonthurt">Promise it wont hurt</a></li>
+		</ul>
+	</section>
+</section>
+<section>
+	<h2>ETC</h2>
+	<hr />
+	<section>
+		<p>안들어가서 아쉬운 것들</p>
+		<p>화살표 함수 선언, 클래스, 개선된 객체 표현식, 탬플릿 문자열, 디스트럭트, 인자(기본값, 나머지), Comprehension, 모듈 로더, 내장클래스의 확장, 리플렉션, 꼬리재귀 최적화
+	</section>
+	<section>
+		<h5>Arrow</h5>
+		<pre><code data-trim>
+// ES 5
+var evens = integers.map(function(i){ return i*2; });
+		</code></pre>
+		<pre class="fragment"><code data-trim>
+// ES 6
+var evens = integers.map(i => i*2);
+		</code></pre>
+	</section>
+	<section>
+		<h5>Class</h5>
+		<pre><code data-trim>
+class SkinnedMesh extends THREE.Mesh {
+  constructor(geometry, materials) {
+    super(geometry, materials);
+    ...
+		</code></pre>
+	</section>
+	<section>
+		<h5>Object Literal</h5>
+		<pre><code data-trim>
+var obj = {
+   // 프로토타입 설정
+   __proto__: theProtoObj,
+   // `handler: handler`의 단축 표기
+   handler,
+   // 메소드
+   toString() {
+     // 부모 호출
+     return "d " + super.toString();
+   }
+};
+		</code></pre>
+	</section>
+	<section>
+		<h5>Template</h5>
+		<pre><code data-trim>
+`Hello World,
+ Welcome ${name}.`
+		</code></pre>
+	</section>
+	<section>
+	<h5>Desctructure</h5>
+	<pre><code data-trim>
+// 배열 순서
+var [a, , b] = [1,2,3];
+
+// 객체의 속성 매칭
+var { op: a, lhs: { op: b }, rhs: c } = getASTNode()
+	</code></pre>
+	</section>
+	<section>
+		<h5>defaults / rest / spread</h5>
+		<pre><code data-trim>
+function f(x, y=12) {
+  return x + y;
+}			
+		</code></pre>
+		<pre><code data-trim>
+function f(x, ...y) {
+  return x * y.length;
+}			
+		</code></pre>
+		<pre><code data-trim>
+function f(x, y, z) {
+  return x + y + z;
+}
+f(...[1,2,3]) == 6			
+		</code></pre>
+</section>
+<section>
+	<h5>Comprehension</h5>
+	<pre><code data-trim>
+var results = [
+  for(c of customers)
+    if (c.city == "Seattle")
+      { name: c.name, age: c.age }
+]
+	</code></pre>
+</section>
+<section>
+<h5>Modeul Loader</h5>
+<pre><code data-trim>
+// 다이나믹 로딩 - `System`이 기본 로더
+System.import('lib/math').then(function(m) {
+  alert("2π = " + m.sum(m.pi, m.pi));
+});
+
+// 새 로더 생성 - 샌드박스 실행
+var loader = new Loader({
+  global: fixup(window) // replace ‘console.log’
+});
+</code></pre>
+</section>
+<section>
+	<h5>Reflection</h5>
+	<pre><code data-trim>
+var args = Reflect.get([], 'slice', arguments);
+Reflect.apply = function(fun, self, args) {
+	return Function.prototype.apply.call(fun,self,args);
+}
+	</code></pre>
+</section>
+<section>
+	<h5>tail-call optimization</h5>
+	<p>Generator로 대체 가능</p>
+<pre><code data-trim>
+function fact_tail_loop(x) {
+  var fact_tail_sub = function* (x, r) {
+    if (x === 0) {
+      return r;
+    } else {
+      yield fact_tail_sub(x - 1, x * r);
+    }
+  };
+  var c = fact_tail_sub(x, 1);
+  var d = {};
+  while (!d.done) {
+    d = c.next();
+    c = d.value;
+  }
+  return d.value;
+}
+
+fact_tail_loop(10000)
+</code></pre>
+</section>
+</section>
+		<section>
+			<h2>END</h2>
+			<hr />
+			<img src="bene.jpg" />
+		</section>
+	</div>
+	<div class="bottom-line">
+		octobersky seoh <span style="color:#cccccc;">$</span> node --harmony es6&nbsp;
+	</div>
+
+</div>
+
+<script src="reveal.js/lib/js/head.min.js"></script>
+<script src="reveal.js/js/reveal.min.js"></script>
+
+<script>
+
+	Reveal.initialize({
+		controls: false,
+		progress: true,
+		history: true,
+		center: false,
+		keyboard: true,
+		note:true,
+		transition: 'linear',
+		dependencies: [
+		{
+			src: 'plugin/highlight/highlight.js',
+			async: true,
+			callback: function() { 
+				hljs.initHighlightingOnLoad(); }
+			}
+			]
+		});
+</script>
+</body>
+</html>
